@@ -21,4 +21,9 @@
         <Using Include="NUnit.Framework"/>
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\..\src\HotelBooking.Application\HotelBooking.Application.csproj" />
+    </ItemGroup>
+    
+
 </Project>
