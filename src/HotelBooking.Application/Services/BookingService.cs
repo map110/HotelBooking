@@ -3,11 +3,13 @@ using HotelBooking.Domain;
 
 namespace HotelBooking.Application.Services;
 
-public class BookingService
+public class BookingService(IBookingRepository bookingRepository)
 {
-    public BookingService()
-    {
-    }
+    // private readonly IBookingRepository _bookingRepository;
+    // public BookingService(IBookingRepository bookingRepository)
+    // {
+    //     _bookingRepository = bookingRepository;
+    // }
 
     public Booking CreateBooking(BookingRequest bookingRequest)
     {
@@ -15,12 +17,13 @@ public class BookingService
         {
             throw new ArgumentException(BookingErrorMessages.CheckOutBeforeCheckIn);
         }
-        return new Booking(
-            bookingRequest.CustomerId,
+
+        var booking = new Booking(bookingRequest.CustomerId,
             bookingRequest.HotelId,
             bookingRequest.RoomId,
             bookingRequest.CheckInDate,
-            bookingRequest.CheckOutDate
-        );
+            bookingRequest.CheckOutDate);
+        bookingRepository.Save(booking);
+        return booking;
     }
 }

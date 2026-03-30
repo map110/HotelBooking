@@ -1,16 +1,18 @@
 ﻿using HotelBooking.Application.Services;
+using HotelBooking.Domain;
 using HotelBooking.Unit.Tests;
+using Moq;
 
 namespace BookingManagement;
 
 public class BookingServiceTests
 {
+    private Mock<IBookingRepository> _bookingRepositoryMock = new Mock<IBookingRepository>();
     private BookingService _bookingService;
-
     [SetUp]
     public void Setup()
     {
-        _bookingService = new BookingService();
+        _bookingService = new BookingService(_bookingRepositoryMock.Object);
     }
 
     [Test]
@@ -54,6 +56,31 @@ public class BookingServiceTests
         //Act && Assert
         var ex = Assert.Throws<ArgumentException>(() => _bookingService.CreateBooking(bookingRequest));
         Assert.That(ex.Message, Is.EqualTo(BookingErrorMessages.CheckOutBeforeCheckIn));
-        //_bookingRepositoryMock.Verify(repo => repo.SaveAsync(It.IsAny<Booking>()), Times.Never);
+        _bookingRepositoryMock.Verify(repo => repo.Save(It.IsAny<Booking>()), Times.Never);
+    }
+
+    [Test]
+    public void CreateBooking_withValidData_ShouldSaveTheBooking()
+    {
+        // Arrange
+        var bookingRequest = new BookingRequest
+        {
+            CustomerId = 1,
+            RoomId = 101,
+            HotelId = 1,
+            CheckInDate = DateOnly.FromDateTime(DateTime.Today),
+            CheckOutDate = DateOnly.FromDateTime(DateTime.Today.AddDays(2))
+        };
+        // Act
+        var booking = _bookingService.CreateBooking(bookingRequest);
+
+        // Assert
+        _bookingRepositoryMock.Verify(repo => repo.Save(It.Is<Booking>(b =>
+            b.CustomerId == bookingRequest.CustomerId &&
+            b.HotelId == bookingRequest.HotelId &&
+            b.RoomId == bookingRequest.RoomId &&
+            b.CheckInDate == bookingRequest.CheckInDate &&
+            b.CheckOutDate == bookingRequest.CheckOutDate
+        )), Times.Once);
     }
 }
