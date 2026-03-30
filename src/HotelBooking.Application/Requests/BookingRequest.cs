@@ -1,4 +1,4 @@
-﻿namespace HotelBooking.Unit.Tests;
+﻿namespace BookingManagement;
 
 public class BookingRequest
 {
