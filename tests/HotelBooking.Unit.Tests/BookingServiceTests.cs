@@ -7,11 +7,13 @@ namespace BookingManagement;
 
 public class BookingServiceTests
 {
-    private Mock<IBookingRepository> _bookingRepositoryMock = new Mock<IBookingRepository>();
+    private Mock<IBookingRepository> _bookingRepositoryMock;
     private BookingService _bookingService;
+
     [SetUp]
     public void Setup()
     {
+        _bookingRepositoryMock = new Mock<IBookingRepository>();
         _bookingService = new BookingService(_bookingRepositoryMock.Object);
     }
 
@@ -82,5 +84,27 @@ public class BookingServiceTests
             b.CheckInDate == bookingRequest.CheckInDate &&
             b.CheckOutDate == bookingRequest.CheckOutDate
         )), Times.Once);
+    }
+
+    [Test]
+    public void CreateBooking_WhenRoomIsAlreadyBooked_ShouldThrowException()
+    {
+        // Arrange
+        var bookingRequest = new BookingRequest
+        {
+            CustomerId = 1,
+            HotelId = 1,
+            RoomId = 1,
+            CheckInDate = DateOnly.FromDateTime(DateTime.Today.AddDays(1)),
+            CheckOutDate = DateOnly.FromDateTime(DateTime.Today.AddDays(5))
+        };
+        _bookingRepositoryMock
+            .Setup(repo => repo.IsRoomBooked(bookingRequest.RoomId, bookingRequest.CheckInDate,
+                bookingRequest.CheckOutDate)).Returns(true);
+        // Act & Assert
+        var ex = Assert.Throws<InvalidOperationException>(() =>
+            _bookingService.CreateBooking(bookingRequest));
+        Assert.That(ex.Message, Is.EqualTo(BookingErrorMessages.RoomAlreadyBooked));
+        _bookingRepositoryMock.Verify(repo => repo.Save(It.IsAny<Booking>()), Times.Never);
     }
 }

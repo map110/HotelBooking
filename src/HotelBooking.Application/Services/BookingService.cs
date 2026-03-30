@@ -18,6 +18,12 @@ public class BookingService(IBookingRepository bookingRepository)
             throw new ArgumentException(BookingErrorMessages.CheckOutBeforeCheckIn);
         }
 
+        if (bookingRepository.IsRoomBooked(bookingRequest.RoomId, bookingRequest.CheckInDate,
+                bookingRequest.CheckOutDate))
+        {
+            throw new InvalidOperationException(BookingErrorMessages.RoomAlreadyBooked);
+        }
+
         var booking = new Booking(bookingRequest.CustomerId,
             bookingRequest.HotelId,
             bookingRequest.RoomId,
