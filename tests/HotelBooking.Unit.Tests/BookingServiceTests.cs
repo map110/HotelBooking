@@ -107,4 +107,18 @@ public class BookingServiceTests
         Assert.That(ex.Message, Is.EqualTo(BookingErrorMessages.RoomAlreadyBooked));
         _bookingRepositoryMock.Verify(repo => repo.Save(It.IsAny<Booking>()), Times.Never);
     }
+
+    [Test]
+    public async  Task GetBooking_ForNotExistingBooking_ShouldThrowExeption()
+    {
+        // Arrange
+        var bookingId = 999; // Assuming this ID does not exist
+        _bookingRepositoryMock
+            .Setup(repo => repo.GetByIdAsync(bookingId))
+            .ReturnsAsync((Booking?)null);
+        // Act & Assert
+        var ex = Assert.ThrowsAsync<KeyNotFoundException>(async () =>
+            await _bookingService.GetBookingAsync(bookingId, 0));
+        Assert.That(ex.Message, Is.EqualTo(string.Format(BookingErrorMessages.BookingNotFound, bookingId)));
+    }
 }

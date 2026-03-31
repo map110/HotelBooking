@@ -32,4 +32,17 @@ public class BookingService(IBookingRepository bookingRepository)
         bookingRepository.Save(booking);
         return booking;
     }
+    public async Task<Booking> GetBookingAsync(int bookingId, int customerId)
+    {
+        var booking = await bookingRepository.GetByIdAsync(bookingId);
+        if (booking == null)
+        {
+            throw new KeyNotFoundException(string.Format(BookingErrorMessages.BookingNotFound, bookingId));
+        }
+        if (booking.CustomerId != customerId)
+        {
+            throw new UnauthorizedAccessException(BookingErrorMessages.Unauthorized);
+        }
+        return booking;
+    }
 }
