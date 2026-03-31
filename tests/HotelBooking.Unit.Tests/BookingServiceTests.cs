@@ -121,4 +121,22 @@ public class BookingServiceTests
             await _bookingService.GetBookingAsync(bookingId, 0));
         Assert.That(ex.Message, Is.EqualTo(string.Format(BookingErrorMessages.BookingNotFound, bookingId)));
     }
+    [Test]
+    public async Task GetBooking_ForGettingSomeOneElseBooking_ShouldThrowExeption()
+    {
+        // Arrange
+        var bookingId = 1;
+        var firstBookingOwnerId = 1;
+        var secondBookingOwnerId = 2;
+        var existingBooking = new Booking(firstBookingOwnerId, 1, 101, DateOnly.FromDateTime(DateTime.Today), DateOnly.FromDateTime(DateTime.Today.AddDays(2)));
+        _bookingRepositoryMock
+            .Setup(repo => repo.GetByIdAsync(bookingId))
+            .ReturnsAsync(existingBooking);
+        // Act 
+        var ex = Assert.ThrowsAsync<UnauthorizedAccessException>(async () => await _bookingService.GetBookingAsync(bookingId, secondBookingOwnerId));
+
+        // Assert
+        Assert.That(ex.Message, Is.EqualTo(BookingErrorMessages.Unauthorized));
+
+    }
 }
