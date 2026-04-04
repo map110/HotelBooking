@@ -7,6 +7,33 @@ namespace BookingManagement;
 
 public class BookingRepositoryTests
 {
+    private BookingRepository _bookingRepository;
+    private HotelBookingDbContext _context;
+
+    [OneTimeSetUp] // یکبار اجرا قبل از آغاز تمام تست ها
+    public void OneTimeSetUp()
+    {
+        var options = new DbContextOptionsBuilder<HotelBookingDbContext>()
+            .UseInMemoryDatabase(databaseName: $"HotelBookingTestDb_{Guid.NewGuid()}")
+            .Options;
+        _context = new HotelBookingDbContext(options);
+        _bookingRepository = new BookingRepository(_context);
+    }
+
+    [TearDown] // اجرا پس از پایان هر تست
+    public void TearDown()
+    {
+        _context.Bookings.RemoveRange(_context.Bookings);
+        _context.SaveChanges();
+    }
+
+    [OneTimeTearDown] // یکبار اجرا بعد از پایان تمام تست ها
+    public void OneTimeTearDown()
+    {
+        _context.Database.EnsureDeleted();
+        _context.Dispose();
+    }
+
     [Test]
     public async Task Save_Booking_ShouldSaveToDatabase()
     {
@@ -20,22 +47,53 @@ public class BookingRepositoryTests
         );
 
         // Act
-        var options = new DbContextOptionsBuilder<HotelBookingDbContext>()
-            .UseInMemoryDatabase(databaseName: $"HotelBookingTestDb_{Guid.NewGuid()}")
-            .Options;
-
-        var context = new HotelBookingDbContext(options);
-        var bookingRepository = new BookingRepository(context);
-        await bookingRepository.SaveAsync(booking);
+        await _bookingRepository.SaveAsync(booking);
 
 
         // Assert
-        var savedBooking = await context.Bookings.FindAsync(booking.Id);
+        var savedBooking = await _bookingRepository.GetByIdAsync(booking.Id);
         Assert.That(savedBooking, Is.Not.Null);
         Assert.That(savedBooking.CustomerId, Is.EqualTo(booking.CustomerId));
         Assert.That(savedBooking.HotelId, Is.EqualTo(booking.HotelId));
         Assert.That(savedBooking.RoomId, Is.EqualTo(booking.RoomId));
         Assert.That(savedBooking.CheckInDate, Is.EqualTo(booking.CheckInDate));
         Assert.That(savedBooking.CheckOutDate, Is.EqualTo(booking.CheckOutDate));
+    }
+
+    [Test]
+    public async Task GetByIdAsync_WithNonExistingBooking_ShouldReturnNull()
+    {
+        // Arrange
+        var nonExistingBookingId = 999;
+        // Act
+        var booking = await _bookingRepository.GetByIdAsync(nonExistingBookingId);
+        // Assert
+        Assert.That(booking, Is.Null);
+    }
+
+    [Test]
+    public async Task GetByIdAsync_WithExistingBooking_ShouldReturnBooking()
+    {
+        // Arrange
+        var booking = new Booking(
+            customerId: 1,
+            roomId: 101,
+            hotelId: 1,
+            checkInDate: DateOnly.FromDateTime(DateTime.Today),
+            checkOutDate: DateOnly.FromDateTime(DateTime.Today.AddDays(2))
+        );
+
+        await _bookingRepository.SaveAsync(booking);
+        // Act
+        var retrievedBooking = await _bookingRepository.GetByIdAsync(booking.Id);
+
+        // Assert
+        Assert.That(retrievedBooking, Is.Not.Null);
+        Assert.That(retrievedBooking.Id, Is.EqualTo(booking.Id));
+        Assert.That(retrievedBooking.CustomerId, Is.EqualTo(booking.CustomerId));
+        Assert.That(retrievedBooking.HotelId, Is.EqualTo(booking.HotelId));
+        Assert.That(retrievedBooking.RoomId, Is.EqualTo(booking.RoomId));
+        Assert.That(retrievedBooking.CheckInDate, Is.EqualTo(booking.CheckInDate));
+        Assert.That(retrievedBooking.CheckOutDate, Is.EqualTo(booking.CheckOutDate));
     }
 }

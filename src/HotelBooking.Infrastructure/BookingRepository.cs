@@ -1,6 +1,7 @@
 ﻿using BookingManagement;
 using HotelBooking.Domain;
 using HotelBooking.Infrastructure.Contexts;
+using Microsoft.EntityFrameworkCore;
 
 namespace HotelBooking.Infrastructure;
 
@@ -15,7 +16,7 @@ public class BookingRepository : IBookingRepository
 
     public Task<Booking?> GetByIdAsync(int bookingId)
     {
-        throw new NotImplementedException();
+        return _context.Bookings.FirstOrDefaultAsync(p => p.Id == bookingId);
     }
 
     public bool IsRoomBooked(int roomId, DateOnly checkIn, DateOnly checkOut)
