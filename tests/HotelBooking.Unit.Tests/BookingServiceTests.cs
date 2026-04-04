@@ -58,7 +58,7 @@ public class BookingServiceTests
         //Act && Assert
         var ex = Assert.Throws<ArgumentException>(() => _bookingService.CreateBooking(bookingRequest));
         Assert.That(ex.Message, Is.EqualTo(BookingErrorMessages.CheckOutBeforeCheckIn));
-        _bookingRepositoryMock.Verify(repo => repo.Save(It.IsAny<Booking>()), Times.Never);
+        _bookingRepositoryMock.Verify(repo => repo.SaveAsync(It.IsAny<Booking>()), Times.Never);
     }
 
     [Test]
@@ -77,7 +77,7 @@ public class BookingServiceTests
         var booking = _bookingService.CreateBooking(bookingRequest);
 
         // Assert
-        _bookingRepositoryMock.Verify(repo => repo.Save(It.Is<Booking>(b =>
+        _bookingRepositoryMock.Verify(repo => repo.SaveAsync(It.Is<Booking>(b =>
             b.CustomerId == bookingRequest.CustomerId &&
             b.HotelId == bookingRequest.HotelId &&
             b.RoomId == bookingRequest.RoomId &&
@@ -105,7 +105,7 @@ public class BookingServiceTests
         var ex = Assert.Throws<InvalidOperationException>(() =>
             _bookingService.CreateBooking(bookingRequest));
         Assert.That(ex.Message, Is.EqualTo(BookingErrorMessages.RoomAlreadyBooked));
-        _bookingRepositoryMock.Verify(repo => repo.Save(It.IsAny<Booking>()), Times.Never);
+        _bookingRepositoryMock.Verify(repo => repo.SaveAsync(It.IsAny<Booking>()), Times.Never);
     }
 
     [Test]

@@ -24,9 +24,9 @@ public class BookingRepository : IBookingRepository
     }
 
 
-    public void Save(Booking booking)
+    public async Task SaveAsync(Booking booking)
     {
-        _context.Add(booking);
-        _context.SaveChanges();
+        await _context.AddAsync(booking);
+        await _context.SaveChangesAsync();
     }
 }

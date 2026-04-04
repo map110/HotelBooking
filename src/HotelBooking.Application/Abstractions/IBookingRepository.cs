@@ -6,5 +6,5 @@ public interface IBookingRepository
 {
     Task<Booking?> GetByIdAsync(int bookingId);
     bool IsRoomBooked(int roomId,DateOnly checkIn, DateOnly checkOut);
-    void Save(Booking booking);   
+    Task SaveAsync(Booking booking);   
 }

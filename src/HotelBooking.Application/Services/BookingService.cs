@@ -29,7 +29,7 @@ public class BookingService(IBookingRepository bookingRepository)
             bookingRequest.RoomId,
             bookingRequest.CheckInDate,
             bookingRequest.CheckOutDate);
-        bookingRepository.Save(booking);
+        bookingRepository.SaveAsync(booking);
         return booking;
     }
     public async Task<Booking> GetBookingAsync(int bookingId, int customerId)

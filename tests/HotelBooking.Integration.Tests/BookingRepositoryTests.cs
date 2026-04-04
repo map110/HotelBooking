@@ -26,7 +26,7 @@ public class BookingRepositoryTests
 
         var context = new HotelBookingDbContext(options);
         var bookingRepository = new BookingRepository(context);
-        bookingRepository.Save(booking);
+        await bookingRepository.SaveAsync(booking);
 
 
         // Assert
