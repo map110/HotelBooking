@@ -30,7 +30,7 @@ public class BookingRepositoryTests
 
 
         // Assert
-        var savedBooking = context.Bookings.Find(booking.Id);
+        var savedBooking = await context.Bookings.FindAsync(booking.Id);
         Assert.That(savedBooking, Is.Not.Null);
         Assert.That(savedBooking.CustomerId, Is.EqualTo(booking.CustomerId));
         Assert.That(savedBooking.HotelId, Is.EqualTo(booking.HotelId));
