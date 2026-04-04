@@ -11,6 +11,7 @@ public class Booking
         CheckOutDate = checkOutDate;
     }
 
+    public int Id { get; }
     public int CustomerId { get; }
     public int HotelId { get; }
     public int RoomId { get; }
