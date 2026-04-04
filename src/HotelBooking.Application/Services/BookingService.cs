@@ -11,14 +11,14 @@ public class BookingService(IBookingRepository bookingRepository)
     //     _bookingRepository = bookingRepository;
     // }
 
-    public Booking CreateBooking(BookingRequest bookingRequest)
+    public async Task<Booking> CreateBooking(BookingRequest bookingRequest)
     {
         if (bookingRequest.CheckOutDate <= bookingRequest.CheckInDate)
         {
             throw new ArgumentException(BookingErrorMessages.CheckOutBeforeCheckIn);
         }
 
-        if (bookingRepository.IsRoomBooked(bookingRequest.RoomId, bookingRequest.CheckInDate,
+        if (await bookingRepository.IsRoomBookedAsync(bookingRequest.RoomId, bookingRequest.CheckInDate,
                 bookingRequest.CheckOutDate))
         {
             throw new InvalidOperationException(BookingErrorMessages.RoomAlreadyBooked);
@@ -32,6 +32,7 @@ public class BookingService(IBookingRepository bookingRepository)
         bookingRepository.SaveAsync(booking);
         return booking;
     }
+
     public async Task<Booking> GetBookingAsync(int bookingId, int customerId)
     {
         var booking = await bookingRepository.GetByIdAsync(bookingId);
@@ -39,10 +40,12 @@ public class BookingService(IBookingRepository bookingRepository)
         {
             throw new KeyNotFoundException(string.Format(BookingErrorMessages.BookingNotFound, bookingId));
         }
+
         if (booking.CustomerId != customerId)
         {
             throw new UnauthorizedAccessException(BookingErrorMessages.Unauthorized);
         }
+
         return booking;
     }
 }

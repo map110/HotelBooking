@@ -19,11 +19,14 @@ public class BookingRepository : IBookingRepository
         return _context.Bookings.FirstOrDefaultAsync(p => p.Id == bookingId);
     }
 
-    public bool IsRoomBooked(int roomId, DateOnly checkIn, DateOnly checkOut)
+    public async Task<bool> IsRoomBookedAsync(int roomId, DateOnly checkIn, DateOnly checkOut)
     {
-        throw new NotImplementedException();
+        
+        return await _context.Bookings.AnyAsync(b =>
+            b.RoomId == roomId &&
+            (b.CheckInDate >= checkIn && b.CheckOutDate >= checkIn) ||
+            (b.CheckInDate <= checkOut && b.CheckOutDate <= checkOut));
     }
-
 
     public async Task SaveAsync(Booking booking)
     {

@@ -96,4 +96,38 @@ public class BookingRepositoryTests
         Assert.That(retrievedBooking.CheckInDate, Is.EqualTo(booking.CheckInDate));
         Assert.That(retrievedBooking.CheckOutDate, Is.EqualTo(booking.CheckOutDate));
     }
+
+    [Test]
+    public async Task IsRoomBooked_WhenRoomIsNotBooked_ShouldReturnFalse()
+    {
+        // Arrange
+        var roomId = 101;
+        var checkIn = DateOnly.FromDateTime(DateTime.Today);
+        var checkOut = DateOnly.FromDateTime(DateTime.Today.AddDays(2));
+        // Act
+        var isBooked = await _bookingRepository.IsRoomBookedAsync(roomId, checkIn, checkOut);
+        // Assert
+        Assert.That(isBooked, Is.False);
+    }
+
+    [Test]
+    public async Task IsRoomBooked_WhenRoomIsBookedForSameDates_ShouldReturnTrue()
+    {
+        // Arrange
+        var roomId = 101;
+        var checkIn = DateOnly.FromDateTime(DateTime.Today);
+        var checkOut = DateOnly.FromDateTime(DateTime.Today.AddDays(2));
+        var booking = new Booking(
+            customerId: 1,
+            roomId: roomId,
+            hotelId: 1,
+            checkInDate: checkIn,
+            checkOutDate: checkOut
+        );
+        await _bookingRepository.SaveAsync(booking);
+        // Act
+        var isBooked = await _bookingRepository.IsRoomBookedAsync(roomId, checkIn, checkOut);
+        // Assert
+        Assert.That(isBooked, Is.True);
+    }
 }
